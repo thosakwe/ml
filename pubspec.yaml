@@ -1,0 +1,6 @@
+name: ml
+dependencies:
+  func: ^1.0.0
+  tuple: ^1.0.0
+dev_dependencies:
+  test: ^0.12.0
