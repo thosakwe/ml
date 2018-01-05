@@ -1,3 +1,3 @@
-export 'src/hypothesis.dart';
-export 'src/neural_network.dart';
-export 'src/training_set.dart';
+export 'src/functions.dart';
+export 'src/layer.dart';
+export 'src/neuron.dart';

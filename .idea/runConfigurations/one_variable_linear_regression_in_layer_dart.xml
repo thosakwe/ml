@@ -1,0 +1,8 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="one-variable linear regression in layer.dart" type="DartTestRunConfigurationType" factoryName="Dart Test" singleton="true" nameIsGenerated="true">
+    <option name="filePath" value="$PROJECT_DIR$/test/layer.dart" />
+    <option name="scope" value="GROUP_OR_TEST_BY_NAME" />
+    <option name="testName" value="one-variable linear regression" />
+    <method />
+  </configuration>
+</component>
