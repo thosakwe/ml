@@ -1,4 +1,5 @@
 import 'dart:collection';
+import 'dart:math' as math;
 import 'package:collection/collection.dart';
 import 'package:typed_data/typed_buffers.dart';
 
@@ -7,7 +8,7 @@ class NDArray extends IterableMixin<NDArrayStride> {
   int _rowCount, _columnCount;
   final Float64Buffer _data;
 
-  NDArray._(this._data, this._rowCount, this._columnCount);
+  NDArray._(this._data, this._columnCount, this._rowCount);
 
   Float64Buffer get data => _data;
 
@@ -17,18 +18,19 @@ class NDArray extends IterableMixin<NDArrayStride> {
 
   int get size => rowCount * columnCount;
 
-  static int _computeIndex(int x, int y, int rowCount) {
-    return (y * rowCount) + x;
+  static int _computeIndex(int x, int y, int columnCount) {
+    //print('x: $x, y: $y; ($y * $columnCount) + $x = ${(y * columnCount) + x}');
+    return (y * columnCount) + x;
   }
 
-  factory NDArray.from(Float64Buffer data, int rowCount, int columnCount) {
-    return new NDArray._(data, rowCount, columnCount);
+  factory NDArray.from(Float64Buffer data, int columnCount, int rowCount) {
+    return new NDArray._(data, columnCount, rowCount);
   }
 
   factory NDArray.fromDoubles(
-      Iterable<double> data, int rowCount, int columnCount) {
+      Iterable<double> data, int columnCount, int rowCount) {
     return new NDArray.from(
-        new Float64Buffer()..addAll(data), rowCount, columnCount);
+        new Float64Buffer()..addAll(data), columnCount, rowCount);
   }
 
   factory NDArray.fromStrides(Iterable<NDArrayStride> strides) {
@@ -44,38 +46,39 @@ class NDArray extends IterableMixin<NDArrayStride> {
   }
 
   factory NDArray.generate(
-      int rowCount, int columnCount, double generate(int x, y)) {
+      int columnCount, int rowCount, double generate(int x, y)) {
     var data = new Float64Buffer(rowCount * columnCount);
 
     for (int y = 0; y < rowCount; y++) {
       for (int x = 0; x < columnCount; x++) {
-        data[_computeIndex(x, y, rowCount)] = generate(x, y);
+        data[_computeIndex(x, y, columnCount)] = generate(x, y);
       }
     }
 
-    return new NDArray._(data, rowCount, columnCount);
+    return new NDArray._(data, columnCount, rowCount);
   }
 
-  factory NDArray.filled(int rowCount, int columnCount, double value) {
-    return new NDArray.generate(rowCount, columnCount, (_, __) => value);
+  factory NDArray.filled(int columnCount, int rowCount, double value) {
+    return new NDArray.generate(columnCount, rowCount, (_, __) => value);
   }
 
-  factory NDArray.zero(int rowCount, int columnCount) {
-    return new NDArray.filled(rowCount, columnCount, 0.0);
+  factory NDArray.zero(int columnCount, int rowCount) {
+    return new NDArray.filled(columnCount, rowCount, 0.0);
   }
 
-  factory NDArray.one(int rowCount, int columnCount) {
-    return new NDArray.filled(rowCount, columnCount, 1.0);
+  factory NDArray.one(int columnCount, int rowCount) {
+    return new NDArray.filled(columnCount, rowCount, 1.0);
   }
 
   NDArrayStride operator [](int index) {
+    if (index >= rowCount) throw new RangeError.range(index, 0, rowCount);
     return new NDArrayStride._(this, index);
   }
 
   @override
   Iterator<NDArrayStride> get iterator => new _NDArrayIterator(this);
 
-  void reshape(int rowCount, int columnCount) {
+  void reshape(int columnCount, int rowCount) {
     if ((rowCount * columnCount) != (this._rowCount * this._columnCount)) {
       throw new ArgumentError(
           'The product of rowCount and columnCount must be equal to ${this
@@ -91,9 +94,44 @@ class NDArray extends IterableMixin<NDArrayStride> {
     return new NDArray._(b, _rowCount, _columnCount);
   }
 
-  NDArray mapAll(double f(double)) {
-    return new NDArray._(new Float64Buffer()..addAll(data.map(f)),
-        _rowCount, _columnCount);
+  NDArray mapAll(double f(double x)) {
+    return new NDArray._(
+        new Float64Buffer()..addAll(data.map(f)), _rowCount, _columnCount);
+  }
+
+  NDArray reduceAgainst(NDArray other, double f(double x, double y)) {
+    var b = new Float64Buffer(_data.length);
+
+    for (int i = 0; i < b.length; i++) {
+      b[i] = f(_data[i], other._data[i]);
+      //print('x: ${_data[i]}, y: ${other._data[i]}, new: ${f(_data[i], other._data[i])}');
+    }
+
+    return new NDArray._(b, _columnCount, _rowCount);
+  }
+
+  NDArray pow(double exponent) {
+    return mapAll((x) => math.pow(x, exponent));
+  }
+
+  NDArray operator *(NDArray other) {
+    return reduceAgainst(other, (x, y) => x * y);
+  }
+
+  NDArray operator /(NDArray other) {
+    return reduceAgainst(other, (x, y) => x / y);
+  }
+
+  NDArray operator %(NDArray other) {
+    return reduceAgainst(other, (x, y) => x % y);
+  }
+
+  NDArray operator +(NDArray other) {
+    return reduceAgainst(other, (x, y) => x + y);
+  }
+
+  NDArray operator -(NDArray other) {
+    return reduceAgainst(other, (x, y) => x - y);
   }
 }
 
@@ -115,13 +153,13 @@ class NDArrayStride extends ListBase<double> with NonGrowableListMixin<double> {
   @override
   double operator [](int index) {
     _verify(index);
-    return _array._data[NDArray._computeIndex(index, _row, _array._rowCount)];
+    return _array._data[NDArray._computeIndex(index, _row, _array._columnCount)];
   }
 
   @override
   void operator []=(int index, double value) {
     _verify(index);
-    _array._data[NDArray._computeIndex(index, _row, _array._rowCount)] = value;
+    _array._data[NDArray._computeIndex(index, _row, _array._columnCount)] = value;
   }
 }
 
@@ -137,7 +175,7 @@ class _NDArrayIterator extends Iterator<NDArrayStride> {
 
   @override
   bool moveNext() {
-    if (index++ >= array._columnCount - 1) {
+    if (index++ >= array._rowCount - 1) {
       return false;
     }
 
