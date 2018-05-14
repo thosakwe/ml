@@ -63,6 +63,10 @@ class Series<E extends num> extends DelegatingList<E> {
     return combineBinary(new Series<E>.from(other), f);
   }
 
+  Series<int> toInts() => mapToArray((x) => x.toInt());
+
+  Series<double> toDoubles() => mapToArray((x) => x.toDouble());
+
   @override
   void set length(int length) {
     if (length > this.length) {

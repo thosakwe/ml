@@ -16,4 +16,10 @@ void main() {
   frame.resize();
 
   print(frame);
+
+  var roundedFrame = frame.transform((s) => s.map((x) => x.roundToDouble()));
+  print(roundedFrame);
+  
+  var intFrame = roundedFrame.toInts();
+  print(intFrame);
 }

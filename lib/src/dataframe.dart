@@ -3,7 +3,7 @@ import 'series.dart';
 
 class DataFrame<K, V extends num> extends DelegatingMap<K, Series<V>> {
   DataFrame() : super({});
-  DataFrame.fromArray(Map<K, Series<V>> map) : super(map);
+  DataFrame.fromArrays(Map<K, Series<V>> map) : super(map);
 
   factory DataFrame.from(Map<K, Iterable<V>> map) {
     var out = <K, Series<V>>{};
@@ -13,7 +13,7 @@ class DataFrame<K, V extends num> extends DelegatingMap<K, Series<V>> {
       out[key] = value is Series<V> ? value : new Series<V>.from(value);
     }
 
-    return new DataFrame.fromArray(out);
+    return new DataFrame.fromArrays(out);
   }
 
   void resize() {
@@ -22,5 +22,19 @@ class DataFrame<K, V extends num> extends DelegatingMap<K, Series<V>> {
     for (var arr in values) {
       arr.length = maxLength;
     }
+  }
+
+  DataFrame<K, double> toDoubles() => transform((s) => s.toDoubles());
+
+  DataFrame<K, int> toInts() => transform((s) => s.toInts());
+
+  DataFrame<K, T> transform<T extends num>(Iterable<T> Function(Series<V>) f) {
+    var out = <K, Series<T>>{};
+
+    for (var key in keys) {
+      out[key] = new Series<T>.from(f(this[key]));
+    }
+
+    return new DataFrame.fromArrays(out);
   }
 }
