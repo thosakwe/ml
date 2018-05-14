@@ -31,6 +31,16 @@ class DataFrame<K, V extends num> extends DelegatingMap<K, Series<V>> {
     return new DataFrame.fromArrays(out);
   }
 
+  DataFrame<K, V> select(Iterable<K> keys) {
+    var out = <K, Series<V>>{};
+
+    for (var key in keys) {
+      out[key] = new Series.from(this[key]);
+    }
+
+    return new DataFrame.fromArrays(out);
+  }
+
   DataFrame<K, V> skip(int n) => transform((s) => s.skip(n));
 
   DataFrame<K, V> take(int n) => transform((s) => s.take(n));

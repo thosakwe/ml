@@ -22,4 +22,6 @@ void main() {
   print(intFrame);
 
   print(intFrame.toDoubles().toList());
+
+  print(intFrame.select(['x', 'avg']));
 }
