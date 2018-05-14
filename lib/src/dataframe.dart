@@ -16,13 +16,24 @@ class DataFrame<K, V extends num> extends DelegatingMap<K, Series<V>> {
     return new DataFrame.fromArrays(out);
   }
 
-  void resize() {
-    var maxLength = values.map((a) => a.length).reduce((a, b) => a > b ? a : b);
+  int get maxLength =>
+      values.map((a) => a.length).reduce((a, b) => a > b ? a : b);
 
-    for (var arr in values) {
-      arr.length = maxLength;
+  DataFrame<K, V> uniform() {
+    var out = <K, Series<V>>{};
+    var m = maxLength;
+
+    for (var key in keys) {
+      var value = new Series.from(this[key]);
+      out[key] = value..length = m;
     }
+
+    return new DataFrame.fromArrays(out);
   }
+
+  DataFrame<K, V> skip(int n) => transform((s) => s.skip(n));
+
+  DataFrame<K, V> take(int n) => transform((s) => s.take(n));
 
   DataFrame<K, double> toDoubles() => transform((s) => s.toDoubles());
 
@@ -36,5 +47,9 @@ class DataFrame<K, V extends num> extends DelegatingMap<K, Series<V>> {
     }
 
     return new DataFrame.fromArrays(out);
+  }
+
+  List<Series<V>> toList({bool growable: true}) {
+    return values.toList(growable: growable);
   }
 }

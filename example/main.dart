@@ -11,15 +11,15 @@ void main() {
     'x': arr,
     'y': arr * [3],
     'avg': arr.average()..length = 3,
-  });
-
-  frame.resize();
+  }).uniform();
 
   print(frame);
 
   var roundedFrame = frame.transform((s) => s.map((x) => x.roundToDouble()));
   print(roundedFrame);
-  
+
   var intFrame = roundedFrame.toInts();
   print(intFrame);
+
+  print(intFrame.toDoubles().toList());
 }
