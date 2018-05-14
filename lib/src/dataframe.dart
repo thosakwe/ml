@@ -16,8 +16,25 @@ class DataFrame<K, V extends num> extends DelegatingMap<K, Series<V>> {
     return new DataFrame.fromArrays(out);
   }
 
+  factory DataFrame.fromIterable(
+      Iterable<K> keys, Iterable<Iterable<V>> values) {
+    var out = <K, Series<V>>{};
+
+    for (int i = 0; i < keys.length; i++) {
+      var key = keys.elementAt(i);
+      var arr = values.elementAt(i);
+      out[key] = arr is Series<V> ? arr : new Series<V>.from(arr);
+    }
+
+    return new DataFrame.fromArrays(out);
+  }
+
   int get maxLength =>
       values.map((a) => a.length).reduce((a, b) => a > b ? a : b);
+
+  DataFrame<K, V> convertIterable(Iterable<Iterable<V>> values) {
+    return new DataFrame<K, V>.fromIterable(keys, values);
+  }
 
   DataFrame<K, V> uniform() {
     var out = <K, Series<V>>{};

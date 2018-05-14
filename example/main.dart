@@ -10,7 +10,7 @@ void main() {
   var frame = new DataFrame.from({
     'x': arr,
     'y': arr * [3],
-    'avg': arr.average()..length = 3,
+    'avg': arr.average(),
   }).uniform();
 
   print(frame);
