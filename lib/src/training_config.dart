@@ -4,7 +4,7 @@ double sigmoid(double x) => 1.0 / (1.0 + exp(-x));
 
 double sigmoidGradient(double x) => sigmoid(x) * (1 - sigmoid(x));
 
-double heaviside(double x) => x >= 0 ? 1.0 : 0.0;
+double heaviside(double x) => x < 0 ? 0.0 : 1.0;
 
 class TrainingConfig {
   static final Random _globalRandom = new Random();
@@ -29,7 +29,7 @@ class TrainingConfig {
       this.nOutputs,
       this.hiddenLayers: const [],
       this.gradient: sigmoidGradient,
-      this.activate: heaviside})
+      this.activate: sigmoid})
       : this.learningRate = learningRate?.toDouble(),
         this.inputs = inputs?.toList(growable: false),
         this.outputs = outputs?.toList(growable: false);
