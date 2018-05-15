@@ -20,7 +20,6 @@ class LinearRegression {
     var inputs = data.select(config.inputs);
     var outputs = data[config.output];
     var batchSize = (config.batchSize ?? inputs.maxLength);
-    var steps = (data.maxLength / batchSize).round();
     int currentStep = 0;
 
     for (var key in config.inputs) weights[key] ??= config.random.nextDouble();
@@ -28,7 +27,7 @@ class LinearRegression {
     for (int epoch = 0; epoch < config.epochs; epoch++) {
       for (int i = 0; i < batchSize; i++) {
         var index = (batchSize * currentStep) + i;
-        var data = inputs.values.map((s) => s[i]).toList(growable: false);
+        var data = inputs.values.map((s) => s[index]).toList(growable: false);
         var expected = outputs[i];
 
         // Compute a value
