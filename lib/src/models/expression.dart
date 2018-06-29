@@ -51,11 +51,25 @@ enum UnaryOperator {
   decrement,
 }
 
+ExpressionNode array(ExpressionNodeType type, Iterable<ExpressionNode> items) =>
+    new ExpressionNode(
+        type: ExpressionNodeType.array,
+        typeArgument: type,
+        length: items.length,
+        arguments: items.toList());
+
+ExpressionNode variable(String name, ExpressionNode initializer) =>
+    new ExpressionNode(
+        type: ExpressionNodeType.declaration, initializer: initializer);
+
+ExpressionNode ref(String name) =>
+    new ExpressionNode(type: ExpressionNodeType.ref, name: name);
+
 ExpressionNode integer(int n, int size) =>
     new ExpressionNode(type: ExpressionNodeType.int, length: size, intValue: n);
 
-ExpressionNode float(double n, int size) =>
-    new ExpressionNode(type: ExpressionNodeType.float, length: size, floatValue: n);
+ExpressionNode float(double n, int size) => new ExpressionNode(
+    type: ExpressionNodeType.float, length: size, floatValue: n);
 
 @Serializable(autoIdAndDateFields: false)
 abstract class _ExpressionNode {
@@ -101,6 +115,9 @@ abstract class _ExpressionNode {
         callee: this,
         arguments: arguments.toList());
   }
+
+  ExpressionNode assignTo(String name) => new ExpressionNode(
+      type: ExpressionNodeType.assignment, name: name, arguments: [this]);
 
   ExpressionNode operator ~() => _unary(UnaryOperator.negate);
 
