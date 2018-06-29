@@ -44,7 +44,7 @@ class LinearRegression {
         for (int j = 0; j < data.length; j++) {
           var key = config.inputs[j];
           var w = weights[key];
-          weights[key] = w - (alpha * delta * data[j]);
+          weights[key] = (w - (alpha * delta * data[j]));
         }
       }
     }
