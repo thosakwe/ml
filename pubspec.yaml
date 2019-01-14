@@ -2,13 +2,8 @@ name: ml
 version: 0.0.0
 author: Tobe Osakwe <thosakwe@gmail.com>
 homepage: https://github.com/thosakwe/ml
-description:
-  >
-    An abstract machine library that on-the-fly compiles models to C and WebGL.
+description: Machine learning experiments with Dart, SIMD, etc. WIP, often in flux.
 environment:
   sdk: ">=2.0.0-dev <3.0.0"
 dependencies:
   c_builder: ^1.0.0
-  code_buffer: ^1.0.0
-dev_dependencies:
-  test: ^1.0.0
